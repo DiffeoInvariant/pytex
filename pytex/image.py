@@ -1,5 +1,5 @@
 from collections.abc import Iterable
-from .command import Command
+from .command import Command, UsePackage
 
 class Image(Command):
 
@@ -7,6 +7,7 @@ class Image(Command):
         self.path = path
         self.opts = None if (scale == 1.0 and (other_options is None)) else (['scale='+str(scale)] + [x for x in other_options])
         super().__init__('includegraphics',[self.path],self.opts)
-
+        self.required_packages = [UsePackage('graphicx')]
+        
 
         

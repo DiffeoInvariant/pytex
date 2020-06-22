@@ -3,7 +3,8 @@ from .text import TextLines
 from .code import CodeStyle
 from .environment import Environment
 from collections.abc import Iterable
-from os.path import abspath
+from os.path import abspath, exists, dirname
+from os import makedirs
 import subprocess
 
 class DocumentClass(Command):
@@ -170,6 +171,7 @@ class Document(Environment):
     def write(self):
         self._make_preamble()
         with open(self.name(),'w') as f:
+            self._ensure_directory_exists()
             self.preamble.write(f)
             f.write(self.begin.get_as_line())
             if self.preamble.make_title():
@@ -191,6 +193,11 @@ class Document(Environment):
         
         outputs = subprocess.run(compile_cmds, capture_output=True)
         return outputs
+
+    def _ensure_directory_exists(self):
+        drct = dirname(abspath(self.name()))
+        if not exists(drct):
+            makedirs(drct)
         
     @staticmethod
     def _format_filename(filename):
