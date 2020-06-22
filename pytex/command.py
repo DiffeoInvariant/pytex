@@ -45,8 +45,12 @@ class Command:
     def write_line(self,open_file):
         open_file.write(self.get_as_line())
 
-    
-
+    def add_end_options(self,end_opts):
+        self.cmd += '['
+        for opt in end_opts:
+            self.cmd += opt
+        self.cmd += ']'
+        
     def _build_string(self,base,lst,left_char='{',right_char='}'):
         res = base
         if left_char:

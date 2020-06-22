@@ -24,6 +24,9 @@ class TextLines:
     def add_line(self, pos: int, newline: str):
         self.lines.insert(pos,_format_line(newline))
 
+    def prepend_line(self,new_line: str):
+        self.lines.insert(0,new_line)
+
     def append_line(self,newline: str):
         self.lines.append(_format_line(newline))
 
