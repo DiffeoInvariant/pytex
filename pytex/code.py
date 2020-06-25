@@ -200,18 +200,11 @@ class CodeSnippet(Environment):
             self.required_packages.append(coldef)
         #add the text style as a required package to put it in the preamble
         self.required_packages.append(self.style.get_as_line())
-        #begin = '\\begin{lstlisting}['
-        #if language:
-        #    begin += f"language={language}"
-        #    if caption:
-        #        begin += f", caption={caption}"
-        #begin += ']'
-        #self._set_begin(begin)
-        lo =  self._listing_options(language,caption)
-        
+        lo = self._listing_options(language,caption)    
         if lo:
             self.add_end_options_to_begin(lo)
         self._set_begin(self.begin.get())
+        
                     
     def _get_style_use_cmd(self):
         self.prepend_line(self.style.command_to_set().get_as_line())
@@ -221,4 +214,9 @@ class CodeSnippet(Environment):
             return [f'language={lang}, ',f'caption={caption}']
         else:
             return [f'language={lang}']
+
+
+
+
+
 

@@ -63,7 +63,7 @@ class Preamble(TextLines):
     def _make_title(self, title, author, use_date):
         self.title = Command('title',[title]) if title else None
         self.author = Command('author',[author]) if author else None
-        self.date = Command('date{}',None) if use_date else None
+        self.date = Command('date{}',None) if not use_date else None
         self.title_data_commands = [self.author,self.title]
         if self.date:
             self.title_data_commands.append(self.date)
@@ -73,6 +73,7 @@ class Preamble(TextLines):
                 self.append_line(cmd.get_as_line())
         self.make_title_command = TextModifier('maketitle') if (title or author or use_date) else None
                               
+
 
 
 
@@ -88,9 +89,9 @@ class Document(Environment):
         self.sections = []
         self.environments = []
         self.preamble = None
-        self.title = None
-        self.author = None
-        self.use_date = None
+        self.title = kwargs.get('title',None)
+        self.author = kwargs.get('author',None)
+        self.use_date = kwargs.get('use_date',False)
         self.iswritten = False
         self._get_doc_class(**kwargs)
         
