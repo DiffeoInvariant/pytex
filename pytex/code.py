@@ -213,9 +213,9 @@ class CodeSnippet(Environment):
         
     def _listing_options(self, lang, caption):
         if caption:
-            return [f'language={lang}, ',f'caption={caption}']
+            return [f'language={lang}, ',f'caption={caption}, ',f'style={self.style.name()}']
         else:
-            return [f'language={lang}']
+            return [f'language={lang}, ',f'style={self.style.name()}']
 
 
 
