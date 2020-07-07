@@ -6,8 +6,11 @@ from collections.abc import Iterable
 from os.path import abspath, exists, dirname
 from os import makedirs
 import subprocess
+from pickle import Pickler, Unpickler, dump, load
 
 class DocumentClass(Command):
+
+    __slots__ = ['fontsz']
 
     def __init__(self,font_pts=11,document_type='article',other_options=None):
         self.fontsz = str(font_pts)+'pt'
@@ -27,6 +30,7 @@ def article_class(font_pts=11,other_options=None):
         
 class Preamble(TextLines):
 
+    __slots__ = ['packages','title','author','date','make_title_command','title_data_commands']
     '''
     Args:
     doc_class: a DocumentClass object
@@ -80,6 +84,8 @@ class Preamble(TextLines):
 
 class Document(Environment):
 
+    __slots__ = ['sections','environments','preamble','title',
+                 'author','use_date','iswritten','doc_class','pickler']
     def __init__(self, filename: str, **kwargs):
         super().__init__('document',None,
                          name=self._format_filename(filename),starred=False)
@@ -94,6 +100,7 @@ class Document(Environment):
         self.use_date = kwargs.get('use_date',False)
         self.iswritten = False
         self._get_doc_class(**kwargs)
+        self.pickler = None
         
     def add_required_packages(self, pkgs):
         if isinstance(pkgs, Environment):
@@ -144,6 +151,17 @@ class Document(Environment):
             raise
 
 
+    def serialize(self, filename: str=None):
+        if filename is None:
+            filename = 'document.bin'
+        dump(self,open(filename,'wb'))
+
+    @staticmethod
+    def from_file(filename: str):
+        with open(filename,'rb') as fnm:
+            return load(fnm)
+
+
     def _get_doc_class(self, **kwargs):
         self.doc_class = kwargs.get('doc_class',None)
         if self.doc_class is None:
@@ -167,7 +185,23 @@ class Document(Environment):
         self.title = title
         self.author = author
         self.use_date = use_date
-        
+
+
+    def __str__(self):
+        self._set_required_packages()
+        prbl = Preamble(self.doc_class,self.required_packages,self.title,self.author,self.use_date)
+        strep = str(prbl)
+
+        strep += self.begin.get_as_line()
+        if prbl.make_title():
+            strep += self.preamble.make_title().get_as_line()
+
+        for sec in self.sections:
+            strep += str(sec)
+
+        strep += self.end.get_as_line()
+
+        return strep
         
     def write(self):
         self._make_preamble()

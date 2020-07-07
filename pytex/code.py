@@ -25,7 +25,6 @@ class CodeColor(TextLines):
         super().__init__([self.line],name)
 
         
-
     def get(self):
         return self.line if self.line else ''
 
@@ -33,6 +32,9 @@ class CodeColor(TextLines):
         if self.line is None:
             return ''
         return self.line if self.line.endswith('\n') else self.line + '\n'
+
+    def get_use_command(self):
+        return Command('color',args=self.vals,options=['rgb'])
     
     @staticmethod
     def Green():
@@ -219,4 +221,17 @@ class CodeSnippet(Environment):
 
 
 
+class ColoredText(TextLines):
 
+    def __init__(self, text: Iterable, color: CodeColor):
+        TextLines.__init__(text)
+        self.color = color
+        self.cmaps = {'red' : (1,0,0), 'blue' : (0,0,1)}
+        if self.color.name() in self.cmaps.keys():
+            self.color.vals = self.cmaps[self.color.name()]
+
+        self.init_cmd = self.color.get_use_command()
+        self.prepend_line('{'+self.init_cmd.get() + ' ')
+        self.append_line('}')
+
+        

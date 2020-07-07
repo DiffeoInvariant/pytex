@@ -1,5 +1,6 @@
 from pytex import Document, Environment, Command, TextModifier, Section, Subsection, CodeColor, CodeStyle, CodeSnippet, Image
 from collections.abc import Iterable
+from inspect import getsource, getsourcelines
 
 class TestReport(Document):
 
@@ -15,6 +16,17 @@ class TestReport(Document):
 
     def add_code_snippet(self, code_lines: Iterable, language='C++', caption=None):
         self.append(CodeSnippet(code_lines,language=language,code_style=self.code_style,caption=caption))
+
+    def add_python_function(self, func, caption=None):
+        try:
+            lines = getsourcelines(func)[0]
+            self.add_code_snippet(lines,language='Python',caption=caption)
+            
+        except OSError as exc:
+            print(f"Error, could not find source code for function {func}!")
+            raise
+        
+        
 
 
     def add_section(self, section_name: str, text_lines: Iterable):
@@ -39,7 +51,7 @@ class TestReport(Document):
                 if k in styles.keys():
                     styles[k] = self.custom_code_colors[k]
 
-        self.code_style = CodeStyle('report_style',**styles)
+        self.code_style = CodeStyle('ReportStyle',**styles)
 
         
         

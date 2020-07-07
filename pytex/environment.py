@@ -3,6 +3,8 @@ from .command import Command, UsePackage
 from collections.abc import Iterable
 
 class Environment(TextLines):
+
+    __slots__ = ['begin','end','required_packages']
     
     def __init__(self, envtype: str, text_lines: Iterable, name: str = None, starred: bool=False, env_options: Iterable=None, required_packages: Iterable=None):
         #NOTE: required_packages is a list of either strings or tuples of string and Iterable[string] (package name or name and options)
@@ -73,6 +75,8 @@ class Environment(TextLines):
 
 class Section(TextLines):
 
+    __slots__ = ['begin']
+    
     def __init__(self, name: str, text_lines: Iterable, starred: bool=False, issubsection: bool = False):
         env = 'section*' if starred else 'section'
         if issubsection:
@@ -86,4 +90,6 @@ class Section(TextLines):
 class Subsection(Section):
 
     def __init__(self,name: str, text_lines: Iterable, starred: bool=False):
-        super().__init__(name,text_lines,starred,True)
+        super().__init__(name,text_lines,starred,issubsection=True)
+
+
