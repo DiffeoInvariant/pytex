@@ -21,19 +21,20 @@ class CodeColor(TextLines):
         self._name = name
         self.vals = values
         self.color_scheme = color_scheme
-        if self.vals:
-            self._make_line()
-            super().__init__([self.line],name)
-        else:
-            self._make_premade_color(name)
-            super().__init__([self.line],name)
-        
+        self._make_line()
+        super().__init__([self.line],name)
 
+        
     def get(self):
-        return self.line
+        return self.line if self.line else ''
 
     def get_as_line(self):
+        if self.line is None:
+            return ''
         return self.line if self.line.endswith('\n') else self.line + '\n'
+
+    def get_use_command(self):
+        return Command('color',args=self.vals,options=['rgb'])
     
     @staticmethod
     def Green():
@@ -56,15 +57,24 @@ class CodeColor(TextLines):
         return CodeColor('red',None)
 
     @staticmethod
+    def Blue():
+        return CodeColor('blue',None)
+
+    @staticmethod
     def DefaultBackground():
         return CodeColor('PyTexDefaultBackground',(0.95,0.95,0.92),'rgb')
         
     def _make_line(self):
-        self.line = '\\definecolor{' + self._name + '}{'
-        for elem in _comma_separated_tuple(self.vals):
-            self.line += elem
-        self.line += '}\n'
+        _default_colors = {'magenta','red','blue'}
+        if self._name in _default_colors:
+            self.line = ''
+        else:
+            self.line = '\\definecolor{' + self._name +  '}{' + self.color_scheme + '}{'
+            for elem in _comma_separated_tuple(self.vals):
+                self.line += elem
+            self.line += '}\n'
 
+    """
     def _make_premade_color(self, pre_name):
         _PREMADE_XCOLORS = {'magenta','green','blue','red','brown'}
         if pre_name not in _PREMADE_XCOLORS:
@@ -73,9 +83,10 @@ class CodeColor(TextLines):
         self.vals = None
         self.color_scheme = 'rbg'
         self.line = None
+     """
 
 
-
+_default_colors = {CodeColor.Green(),CodeColor.Gray(),CodeColor.Purple(),CodeColor.Magenta(),CodeColor.Red(),CodeColor.Blue(),CodeColor.DefaultBackground()}
 
 class CodeStyle:
 
@@ -97,12 +108,15 @@ class CodeStyle:
                  show_tabs=False,
                  tabsize=2):
 
+        self._colors = [background_color, comment_color, keyword_color,
+                        number_color, string_color]
         self._name = style_name
         self._get_style_options(background_color,comment_color,keyword_color,
                                 number_color,string_color,basic_style_mods,
                                 whitespace_break, breaklines, caption_pos,
                                 keep_spaces, number_alignment, number_sep_pts,
                                 show_spaces, show_string_spaces, show_tabs, tabsize)
+        self._get_color_defines()
         self._get_style_define()
         
         
@@ -117,6 +131,13 @@ class CodeStyle:
 
     def command_to_set(self):
         return Command('lstset',[f'style={self._name}'])
+
+    def color_definitions(self):
+        return self.color_defs
+    
+    def _get_color_defines(self):
+        self.color_defs = [col.get_as_line() for col in self._colors]
+                        
 
     def _get_style_define(self):
         self.cmd = "\\lstdefinestyle{" + self._name + "}{\n"
@@ -172,19 +193,45 @@ class CodeSnippet(Environment):
         self.style = code_style if code_style else CodeStyle('default_pytex_code_style')
         self.lang = language
         super().__init__('lstlisting',code_lines,
-                         name if name else language + ' code snippet',False,self._listing_options(language,caption),
+                         name if name else language + ' code snippet',False,None,
                          _PYTEX_REQUIRED_CODE_PKGS)
-        self._get_style_use_cmd()
-        #add the text stype as a required package to put it in the preamble
-        self.required_packages.add(self.style.get_as_line())
         
-
+        #self.end = Command('end','lstlisting',opts)
+        self._get_style_use_cmd()
+        for coldef in self.style.color_definitions():
+            self.required_packages.append(coldef)
+        #add the text style as a required package to put it in the preamble
+        self.required_packages.append(self.style.get_as_line())
+        lo = self._listing_options(language,caption)    
+        if lo:
+            self.add_end_options_to_begin(lo)
+        self._set_begin(self.begin.get())
+        
+                    
     def _get_style_use_cmd(self):
         self.prepend_line(self.style.command_to_set().get_as_line())
         
     def _listing_options(self, lang, caption):
         if caption:
-            return [f'language={lang}',f'caption={caption}']
+            return [f'language={lang}, ',f'caption={caption}, ',f'style={self.style.name()}']
         else:
-            return [f'language={lang}']
+            return [f'language={lang}, ',f'style={self.style.name()}']
 
+
+
+
+
+class ColoredText(TextLines):
+
+    def __init__(self, text: Iterable, color: CodeColor):
+        TextLines.__init__(text)
+        self.color = color
+        self.cmaps = {'red' : (1,0,0), 'blue' : (0,0,1)}
+        if self.color.name() in self.cmaps.keys():
+            self.color.vals = self.cmaps[self.color.name()]
+
+        self.init_cmd = self.color.get_use_command()
+        self.prepend_line('{'+self.init_cmd.get() + ' ')
+        self.append_line('}')
+
+        

@@ -3,6 +3,8 @@ from .command import Command, UsePackage
 from collections.abc import Iterable
 
 class Environment(TextLines):
+
+    __slots__ = ['begin','end','required_packages']
     
     def __init__(self, envtype: str, text_lines: Iterable, name: str = None, starred: bool=False, env_options: Iterable=None, required_packages: Iterable=None):
         #NOTE: required_packages is a list of either strings or tuples of string and Iterable[string] (package name or name and options)
@@ -32,19 +34,25 @@ class Environment(TextLines):
     #adds a new line BEFORE the start of this Environment
     def prepend_line(self, new_line):
         self.add_line(0,new_line)
+
+    def add_end_options_to_begin(self, new_opts):
+        self.begin.add_end_options(new_opts)
                 
     def _get_required_packages(self, required_packages):
-        self.required_packages = set({})
+        self.required_packages = []
         if required_packages is None:
             return
         
         for pkg in required_packages:
             if isinstance(pkg,Command):
-                self.required_packages.add(pkg)
+                if pkg not in self.required_packages:
+                    self.required_packages.append(pkg)
             elif isinstance(pkg,str):
-                self.required_packages.add(UsePackage((pkg,)))
+                if pkg not in self.required_packages:
+                    self.required_packages.append(pkg)
             else:
-                self.required_packages.add(UsePackage(*pkg))
+                if pkg not in self.required_packages:
+                    self.required_packages.append(UsePackage(*pkg))
 
         
     
@@ -56,13 +64,19 @@ class Environment(TextLines):
 
     def _get_end(self, envtype, starred, opts):
         if starred:
-            self.end = Command('end',envtype+'*',opts)
+            self.end = Command('end',envtype+'*')#,opts)
         else:
-            self.end = Command('end',envtype,opts)
+            self.end = Command('end',envtype)#,opts)
 
+    def _set_begin(self, custom_begin):
+        self.begin = custom_begin
+        self.lines = self.lines[1:]
+        self.lines[0] = self.begin if self.begin.endswith('\n') else self.begin+'\n'
 
 class Section(TextLines):
 
+    __slots__ = ['begin']
+    
     def __init__(self, name: str, text_lines: Iterable, starred: bool=False, issubsection: bool = False):
         env = 'section*' if starred else 'section'
         if issubsection:
@@ -76,4 +90,6 @@ class Section(TextLines):
 class Subsection(Section):
 
     def __init__(self,name: str, text_lines: Iterable, starred: bool=False):
-        super().__init__(name,text_lines,starred,True)
+        super().__init__(name,text_lines,starred,issubsection=True)
+
+

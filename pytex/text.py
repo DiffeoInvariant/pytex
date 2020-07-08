@@ -7,10 +7,18 @@ def _format_line(string):
 
 class TextLines:
 
+    __slots__ = ['lines','_name','head_cmt']
+
     def __init__(self,lines,sec_name=None):
         self.lines = [_format_line(x) for x in lines] if lines else []
         self._name = str(sec_name) if sec_name else "PyTex TextLines section"
         self.head_cmt = _format_line(f"\n% {self.name()}")
+
+    def __str__(self):
+        return '\n'.join(self.lines)
+
+    def __repr__(self):
+        return self.__str__()
 
     def name(self):
         return self._name
@@ -23,6 +31,9 @@ class TextLines:
     
     def add_line(self, pos: int, newline: str):
         self.lines.insert(pos,_format_line(newline))
+
+    def prepend_line(self,new_line: str):
+        self.lines.insert(0,new_line)
 
     def append_line(self,newline: str):
         self.lines.append(_format_line(newline))

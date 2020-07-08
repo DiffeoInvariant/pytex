@@ -2,6 +2,7 @@ from collections.abc import Iterable
 
 class Command:
 
+    __slots__ = ['cmd','opts','args']
     def __init__(self,cmd,args=None,options=None):
         self.cmd = '\\' + cmd
         self._get_args(args)
@@ -31,7 +32,7 @@ class Command:
         return self.cmd
 
     def get_options(self):
-        return self.options
+        return self.opts
 
     def get_args(self):
         return self.args
@@ -45,8 +46,12 @@ class Command:
     def write_line(self,open_file):
         open_file.write(self.get_as_line())
 
-    
-
+    def add_end_options(self,end_opts):
+        self.cmd += '['
+        for opt in end_opts:
+            self.cmd += opt
+        self.cmd += ']'
+        
     def _build_string(self,base,lst,left_char='{',right_char='}'):
         res = base
         if left_char:
@@ -95,6 +100,8 @@ class UsePackage(Command):
 
 class NewCommand:
 
+    __slots__ = ['decl']
+    
     def __init__(self,new_command_name: str, new_command_replaces: str, num_args: int=0, defaults=None):
         self.decl = '\newcommand{' + new_command_name + '}'
         if int(num_args) > 0:
