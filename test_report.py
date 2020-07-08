@@ -23,9 +23,13 @@ class TestClass(TestBaseClass):
         self.c = c
 
     def get_a(self):
+        # a comment
         return self.a
 
     def get_b(self):
+        """
+        a multi-line comment
+        """
         return self.b
 
     def get_c(self):
