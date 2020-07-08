@@ -25,6 +25,15 @@ class TestReport(Document):
         except OSError as exc:
             print(f"Error, could not find source code for function {func}!")
             raise
+
+    def add_python_object(self, obj, caption=None):
+        try:
+            lines = getsourcelines(obj)[0]
+            self.add_code_snippet(lines,language='Python',caption=caption)
+            
+        except OSError as exc:
+            print(f"Error, could not find source code for object {obj}!")
+            raise
         
         
 
