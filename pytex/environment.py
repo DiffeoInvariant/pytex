@@ -202,16 +202,22 @@ class Equation(Environment):
 
         lines = unicode_to_latex(uni,unknown_char_policy='ignore')
         
-        code = lines.replace('[i]','_{i}')
-        code = code.replace('[i,i]','_{ii}')
-        code = code.replace('[i,i,i]','_{iii}')
+        #could use a regex but that's just asking for bugs with so few cases
+        code = lines.replace('[i]','')#'_{i}')
+        code = code.replace('[i,i]','')#''_{ii}')
+        code = code.replace('[i,i,i]','')#''_{iii}')
         code = code.replace('\\ensuremath{\\forall} i,i','')
         code = code.replace('\\ensuremath{\\forall} i','')
         code = code.replace('{\\textasciicircum}','^')
         code = code.replace('{\\textunderscore}','_')
         code = code.replace('[rest of domain]','_{\\Omega}')
         code = code.replace('\\_','_')
-
+        grad_pattern = '\ensuremath{\mathbf{g}}\ensuremath{\mathbf{r}}\ensuremath{\mathbf{a}}\ensuremath{\mathbf{d}}\\,'
+        code = code.replace(grad_pattern,'\\nabla ')
+        #grad(grad(x)) |--> div(grad(x))
+        code = code.replace('\\nabla \\nabla ','\\nabla \\cdot \\nabla ')
+        #remove summation sign
+        code = code.replace('\ensuremath{\sum}','')
         return Equation([code],starred,eq_name)
         
 
