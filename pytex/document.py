@@ -153,7 +153,7 @@ class Document(Environment):
 
     def serialize(self, filename: str=None):
         if filename is None:
-            filename = 'document.bin'
+            filename = 'document.dat'
         dump(self,open(filename,'wb'))
 
     @staticmethod

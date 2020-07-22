@@ -1,6 +1,20 @@
 from pytex import Document, Environment, Command, TextModifier, Section, Subsection, CodeColor, CodeStyle, CodeSnippet, Image
 from collections.abc import Iterable
 from inspect import getsource, getsourcelines
+import subprocess
+
+def make_pytest_report(pytest_output_file, **kwargs):
+    print(f"lines in {pytest_output_file}")
+    for line in open(pytest_output_file,'r').readlines():
+        print(line)
+    
+
+
+
+
+
+
+
 
 class TestReport(Document):
 
