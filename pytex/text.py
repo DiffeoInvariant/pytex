@@ -38,6 +38,10 @@ class TextLines:
     def append_line(self,newline: str):
         self.lines.append(_format_line(newline))
 
+    def append_lines(self, new_lines):
+        for line in new_lines:
+            self.append_line(line)
+
     def write(self,open_file):
         open_file.write(self.head_cmt)
         for ln in self.lines:
