@@ -20,6 +20,12 @@ class TextLines:
     def __repr__(self):
         return self.__str__()
 
+    @staticmethod
+    def from_file(filename: str):
+        lines = [line for line in open(filename,'r')]
+        return TextLines(lines,filename)
+
+                
     def name(self):
         return self._name
 
@@ -47,4 +53,13 @@ class TextLines:
         for ln in self.lines:
             open_file.write(ln)
 
+
+    def save(self, filename):
+        try:
+            with open(filename,'w') as f:
+                self.write(f)
+        except:
+            raise
+
+            
             

@@ -1,15 +1,18 @@
 from pytex import Document, Environment, Command, TextModifier, Section, Subsection, CodeColor, CodeStyle, CodeSnippet, Image
-from pytex.utils import register_colors, view_registered_colors
+from pytex.utils import register_colors, view_registered_colors, remove_colors
 from collections.abc import Iterable
 from inspect import getsource, getsourcelines
 import subprocess
 
 def make_pytest_report(pytest_output_file, **kwargs):
     ofile = open(pytest_output_file,'r')
+    clean_lines = []
     for line in ofile.readlines():
         #print(line.encode('ascii'),'\n')
-        #print("split line:",line.encode('ascii').split(b'\x1b['))
+        print("split line:",line.encode('ascii').split(b'\x1b['))
         register_colors(line,['blue','green','red'])
+        print(f"line without color defs: {remove_colors(line)}")
+        line = remove_colors(line)
         #print("colors:\n")
     view_registered_colors()
 

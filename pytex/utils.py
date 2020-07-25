@@ -6,6 +6,103 @@ from typing import List
 _color_registry = {}
 _inverse_color_registry = {}
 
+
+unicode_supers = {'\u2070'           : '0',
+                        #f'\N{DEGREE SIGN}' : '0',
+                        f'\N{SUPERSCRIPT ONE}' : '1',
+                        f'\N{SUPERSCRIPT TWO}' : '2',
+                        f'\N{SUPERSCRIPT THREE}': '3',
+                        f'\N{SUPERSCRIPT FOUR}': '4',
+                        f'\N{SUPERSCRIPT FIVE}': '5',
+                        f'\N{SUPERSCRIPT SIX}' : '6',
+                        f'\N{SUPERSCRIPT SEVEN}' : '7',
+                        f'\N{SUPERSCRIPT EIGHT}' : '8',
+                        f'\N{SUPERSCRIPT NINE}' : '9'}
+
+
+
+unicode_subs = {f'\N{SUBSCRIPT ZERO}' : '0',
+                      f'\N{SUBSCRIPT ONE}' : '1',
+                      f'\N{SUBSCRIPT TWO}' : '2',
+                      f'\N{SUBSCRIPT THREE}': '3',
+                      f'\N{SUBSCRIPT FOUR}': '4',
+                      f'\N{SUBSCRIPT FIVE}': '5',
+                      f'\N{SUBSCRIPT SIX}' : '6',
+                      f'\N{SUBSCRIPT SEVEN}' : '7',
+                      f'\N{SUBSCRIPT EIGHT}' : '8',
+                      f'\N{SUBSCRIPT NINE}' : '9'}
+
+unicode_specials = {'\u20D7' : '\\vec'}
+
+
+def replace_special_chars(string):
+    for i, char in enumerate(string):
+        if char in unicode_specials.keys():
+            tmp = string[:i] + unicode_specials[char] + string[i:]
+            string = tmp
+    return string
+
+
+def replace_superscripts(string):
+    N = len(string)
+    cpy = ''
+    i = 0
+    while i < N:
+        char = string[i]
+        if char in unicode_supers.keys():
+            making_num = True
+            num = '^{' + unicode_supers[char]
+            digits = 1
+            while i + digits < N and making_num:
+                nextchar = string[i+digits]
+                if nextchar in unicode_supers.keys():
+                    num += unicode_supers[nextchar]
+                    digits += 1
+                else:
+                    making_num = False
+
+                i += digits - 1
+
+            num += '}'
+            cpy += num
+
+        else:
+            cpy += char
+
+        i += 1
+
+    return cpy
+
+def replace_subscripts(string):
+    N = len(string)
+    cpy = ''
+    i = 0
+    while i < N:
+        char = string[i]
+        if char in unicode_subs.keys():
+            making_num = True
+            num = '_{' + unicode_subs[char]
+            digits = 1
+            while i + digits < N and making_num:
+                nextchar = string[i+digits]
+                if nextchar in unicode_subs.keys():
+                    num += unicode_subs[nextchar]
+                    digits += 1
+                else:
+                    making_num = False
+
+                i += digits - 1
+
+            num += '}'
+            cpy += num
+
+        else:
+            cpy += char
+
+        i += 1
+
+    return cpy
+
 def view_registered_colors():
     for name in _color_registry.keys():
         print(f"{name} = {_color_registry[name]}")
@@ -94,3 +191,18 @@ def register_colors(string: str, names: List[str]) -> None:
             continue
      
             
+
+def remove_colors(string: str) -> str:
+    bstr = string.encode('ascii').split(b'\x1b[')
+    sstr = [None]*len(bstr)
+    for i in range(len(bstr)):
+        sstr[i] = str(bstr[i],'ascii')
+        for color in _color_registry:
+            sstr[i] = sstr[i].replace(color,'')
+
+    return ''.join(sstr)
+
+            
+    
+#def get_pytest_header(pytest_out_lines):
+    
