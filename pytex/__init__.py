@@ -6,4 +6,4 @@ from .document import Document, DocumentClass, Preamble, article_class
 from .image import Image
 from .report import TestReport, make_pytest_report
 from .unittest import TestResultGenerator
-from .utils import register_colors, view_registered_colors, remove_colors, replace_special_chars, replace_subscripts, replace_superscripts, get_color, get_color_name
+from .utils import register_colors, view_registered_colors, remove_colors, replace_special_chars, replace_subscripts, replace_superscripts, replace_supers_and_subs, get_color, get_color_name

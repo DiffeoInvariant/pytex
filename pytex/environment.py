@@ -123,7 +123,7 @@ class Equation(Environment):
         code = code.replace('\\nabla \\nabla ','\\nabla^2')
 
         brackets = bracket_positions(code)
-        for i in range(len(brackets)):
+        while brackets:
             leftpos,rightpos = brackets[0]
             code = brackets_to_subscript(code,leftpos,rightpos)
             brackets = bracket_positions(code)
