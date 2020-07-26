@@ -68,9 +68,7 @@ class Preamble(TextLines):
         self.title = Command('title',[title]) if title else None
         self.author = Command('author',[author]) if author else None
         self.date = Command('date{}',None) if not use_date else None
-        self.title_data_commands = [self.author,self.title]
-        if self.date:
-            self.title_data_commands.append(self.date)
+        self.title_data_commands = [self.title,self.author,self.date]
 
         for cmd in self.title_data_commands:
             if cmd:
@@ -183,8 +181,18 @@ class Document(Environment):
 
     def set_title(self, title, author=None, use_date=False):
         self.title = title
+        if author and author != self.author:
+            self.author = author
+
+        if use_date and use_date != self.use_date:
+            self.use_date = use_date
+
+    def set_author(self,author=None):
         self.author = author
+
+    def set_use_date(self,use_date=True):
         self.use_date = use_date
+        
 
 
     def __str__(self):

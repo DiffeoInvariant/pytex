@@ -26,7 +26,7 @@ class TestReport(Document):
 
     def __init__(self, filename: str, report_title: str=None, author: str=None, use_date: bool=False, **kwargs):
         report_title = report_title if report_title else 'PyTeX-Generated Test Report'
-        super().__init__(filename, title=report_title,author=author,use_date=use_date)
+        super().__init__(filename, title=report_title,author=author,use_date=use_date,**kwargs)
         # pass in code_colors as a dictionary mapping
         # any (or multiple) of the strings {background_color,comment_color,keyword_color,number_color,string_color} or the Iterable[str] basic_style_mods
         # to instances of pytex.CodeColor
@@ -55,7 +55,8 @@ class TestReport(Document):
             print(f"Error, could not find source code for object {obj}!")
             raise
         
-        
+
+    #def add_pytest_header(self, header_lines
 
 
     def add_section(self, section_name: str, text_lines: Iterable):
