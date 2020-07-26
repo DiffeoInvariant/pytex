@@ -1,7 +1,8 @@
 from .text import TextLines
 from .command import Command, UsePackage
-from .utils import replace_special_chars, replace_subscripts, replace_superscripts, get_color, get_color_name
+from .utils import replace_special_chars, replace_supers_and_subs, get_color, get_color_name
 from collections.abc import Iterable
+import re
 
 class Environment(TextLines):
 
@@ -97,14 +98,17 @@ class Equation(Environment):
         """
         from ufl.formatting.ufl2unicode import ufl2unicode
         from pylatexenc.latexencode import unicode_to_latex
-        uni = ufl2unicode(ufl_expr)
-        uni = replace_superscripts(uni)
-        uni = replace_subscripts(uni)
+        uni = replace_supers_and_subs(ufl2unicode(ufl_expr))
         code = unicode_to_latex(uni,unknown_char_policy='ignore')
-        #could use a regex but that's just asking for bugs with so few cases
-        #code = lines.replace('[i]','')#'_{i}')
-        #code = code.replace('[i,i]','')#''_{ii}')
-        #code = code.replace('[i,i,i]','')#''_{iii}')
+        bracket_extractor = re.compile(r'\[(.*?)\]')
+        bracket_positions = lambda s: [it.span() for it in bracket_extractor.finditer(s)]
+        def brackets_to_subscript(string, leftpos, rightpos):
+            return string[:(leftpos)] + '_{'+string[(leftpos+1):(rightpos-1)]+'}' + string[(rightpos):]
+        drb_extractor = re.compile(r'}(i.*?)\]')
+        dangling_i_rbrackets = lambda s: [it.span() for it in drb_extractor.finditer(s)]
+        def dbracket_to_subscript(string, leftpos, rightpos):
+            return string[:(leftpos+1)] + '_{i'+string[(leftpos+2):(rightpos-1)]+'}' + string[(rightpos):]
+
         code = code.replace('\\ensuremath{\\forall} i,i','')
         code = code.replace('\\ensuremath{\\forall} i','')
         code = code.replace('{\\textasciicircum}','^')
@@ -115,10 +119,21 @@ class Equation(Environment):
         code = code.replace('\\}','}')
         grad_pattern = '\ensuremath{\mathbf{g}}\ensuremath{\mathbf{r}}\ensuremath{\mathbf{a}}\ensuremath{\mathbf{d}}\\,'
         code = code.replace(grad_pattern,'\\nabla ')
-        #grad(grad(x)) |--> div(grad(x))
+        #grad(grad(x)) |--> laplacian(x)
         code = code.replace('\\nabla \\nabla ','\\nabla^2')
-        #remove summation sign
-        #code = code.replace('\ensuremath{\sum}','')
+
+        brackets = bracket_positions(code)
+        for i in range(len(brackets)):
+            leftpos,rightpos = brackets[0]
+            code = brackets_to_subscript(code,leftpos,rightpos)
+            brackets = bracket_positions(code)
+
+        dirbs = dangling_i_rbrackets(code)
+        while dirbs:
+            lpos,rpos = dirbs[0]
+            code = dbracket_to_subscript(code,lpos,rpos)
+            dirbs = dangling_i_rbrackets(code)
+            
         return Equation([code],starred,eq_name)
         
 

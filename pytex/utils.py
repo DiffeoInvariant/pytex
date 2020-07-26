@@ -73,6 +73,7 @@ def replace_superscripts(string):
 
     return cpy
 
+
 def replace_subscripts(string):
     N = len(string)
     cpy = ''
@@ -102,6 +103,9 @@ def replace_subscripts(string):
         i += 1
 
     return cpy
+
+def replace_supers_and_subs(string):
+    return replace_superscripts(replace_subscripts(string))
 
 def view_registered_colors():
     for name in _color_registry.keys():
