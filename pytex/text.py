@@ -25,7 +25,7 @@ class TextLines:
         lines = [line for line in open(filename,'r')]
         return TextLines(lines,filename)
 
-                
+
     def name(self):
         return self._name
 

@@ -2,11 +2,11 @@ from collections.abc import Iterable
 
 class Command:
 
-    __slots__ = ['cmd','opts','args']
-    def __init__(self,cmd,args=None,options=None):
+    __slots__ = ['cmd','opts','postopts','args']
+    def __init__(self,cmd,args=None,options=None,postopts=None):
         self.cmd = '\\' + cmd
         self._get_args(args)
-        self._get_options(options)
+        self._get_options(options,postopts)
         self._build_command()
 
 
@@ -48,8 +48,12 @@ class Command:
 
     def add_end_options(self,end_opts):
         self.cmd += '['
-        for opt in end_opts:
-            self.cmd += opt
+        for i,opt in enumerate(end_opts):
+            if i == len(end_opts)-1:
+                self.cmd += opt
+            else:
+                self.cmd += opt
+                self.cmd += ','
         self.cmd += ']'
         
     def _build_string(self,base,lst,left_char='{',right_char='}'):
@@ -74,6 +78,9 @@ class Command:
             self.cmd = self._build_string(self.cmd,self.opts,'[',']')
         if self.args:
             self.cmd = self._build_string(self.cmd,self.args,'{','}')
+        if self.postopts:
+            self.add_end_options(self.postopts)
+            
 
 
     def _get_args(self,args):
@@ -84,13 +91,20 @@ class Command:
         else:
             self.args = args
 
-    def _get_options(self,options):
+    def _get_options(self,options,postoptions):
         if isinstance(options,str):
             self.opts = [x.strip() for x in options.split(",")]
         elif options:
             self.opts = [str(x) for x in options]
         else:
             self.opts = options
+
+        if isinstance(postoptions,str):
+            self.postopts = [x.strip() for x in postoptions.split(",")]
+        elif postoptions:
+            self.postopts = [str(x) for x in postoptions]
+        else:
+            self.postopts = postoptions
             
 
 class UsePackage(Command):

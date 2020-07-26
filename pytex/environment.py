@@ -8,10 +8,10 @@ class Environment(TextLines):
 
     __slots__ = ['begin','end','required_packages']
     
-    def __init__(self, envtype: str, text_lines: Iterable, name: str = None, starred: bool=False, env_options: Iterable=None, required_packages: Iterable=None):
+    def __init__(self, envtype: str, text_lines: Iterable, name: str = None, starred: bool=False, env_options: Iterable=None, required_packages: Iterable=None, post_options: Iterable=None):
         #NOTE: required_packages is a list of either strings or tuples of string and Iterable[string] (package name or name and options)
         nm = name if name else "Environment"
-        self._get_begin(envtype,nm,starred,env_options)
+        self._get_begin(envtype,nm,starred,env_options,post_options)
         self._get_end(envtype,starred,env_options)
         text_lines = text_lines if text_lines else []
         text_lines.insert(0,self.begin.get_as_line())
@@ -37,6 +37,8 @@ class Environment(TextLines):
     def prepend_line(self, new_line):
         self.add_line(1,new_line)
 
+
+
     def add_end_options_to_begin(self, new_opts):
         self.begin.add_end_options(new_opts)
         self.lines[0] = self.begin.get_as_line()
@@ -59,11 +61,11 @@ class Environment(TextLines):
 
         
     
-    def _get_begin(self, envtype, name, starred, opts):
+    def _get_begin(self, envtype, name, starred, opts, postopts):
         if starred:
-            self.begin = Command('begin',envtype+'*',opts)
+            self.begin = Command('begin',envtype+'*',opts,postopts)
         else:
-            self.begin = Command('begin',envtype,opts)
+            self.begin = Command('begin',envtype,opts,postopts)
 
     def _get_end(self, envtype, starred, opts):
         if starred:
@@ -78,6 +80,12 @@ class Environment(TextLines):
 
 
 
+
+def ufl_form_info(form, name=None):
+        from pytex.utils import get_ufl_form_info
+        #print(f"coeff names : {[x._name for x in form.coefficients()]}")
+        req_pkgs = [UsePackage('fancyvrb')]
+        return Environment('Verbatim',get_ufl_form_info(form).split('\n'),name if name else 'UFL Form info',starred=False,required_packages=req_pkgs,post_options=['xleftmargin=-3cm','fontsize=\\tiny'])
 
 class Equation(Environment):
 
@@ -135,7 +143,9 @@ class Equation(Environment):
             dirbs = dangling_i_rbrackets(code)
             
         return Equation([code],starred,eq_name)
-        
+
+
+
 
 class Section(TextLines):
 

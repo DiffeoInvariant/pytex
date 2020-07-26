@@ -2,7 +2,6 @@ import re
 import unicodedata
 from typing import List
 
-
 _color_registry = {}
 _inverse_color_registry = {}
 
@@ -209,4 +208,49 @@ def remove_colors(string: str) -> str:
             
     
 #def get_pytest_header(pytest_out_lines):
+'''
+version of the code at https://github.com/FEniCS/ufl/blob/master/ufl/formatting/printing.py, but this actually works
+'''
+
+def get_ufl_form_info(form):
+    from ufl.form import Form
+    from ufl.integral import Integral
+    from ufl.formatting.printing import integral_info
+    from ufl.log import error as uflerr
+
+    if not isinstance(form,Form):
+        uflerr(f"Expecting a ufl.Form, in ufl_form_info, got a {type(form)}")
+
+    args = form.arguments()
+    coeffs = form.coefficients()
+
+    fi =  "Form info:\n"
+    fi += f"  rank:                   {len(args)}\n"
+    fi += f"  num_coefficients:       {len(coeffs)}\n"
+
+    for c in coeffs:
+        try:
+            nm = c._name
+            ct = c._count
+            fi += f"\n  Coefficient {ct} is named {nm}"
+        except AttributeError:
+            fi += f"\n  {c._repr} (unnamed)"
+
+    fi += "\n"
+
+    integrals = form.integrals()
+    int_types = sorted(set(it.integral_type() for it in integrals))
+    for itype in int_types:
+        ibts = form.integrals_by_type(itype)
+        for itg in ibts:
+            fi += integral_info(itg)
+            fi += "\n"
+    #post-processing
+    fi = fi.replace('#','')
     
+    
+    return fi
+
+    
+
+
