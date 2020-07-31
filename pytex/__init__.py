@@ -1,6 +1,6 @@
 from .text import TextLines
 from .command import Command, UsePackage, TextModifier, NewCommand
-from .environment import Environment, Section, Subsection, Equation, ufl_form_info
+from .environment import Environment, Section, Subsection, Equation, ufl_form_info,ufl2latex
 from .code import CodeColor, CodeStyle, CodeSnippet
 from .document import Document, DocumentClass, Preamble, article_class
 from .image import Image

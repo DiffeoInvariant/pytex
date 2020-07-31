@@ -7,6 +7,7 @@ from os.path import abspath, exists, dirname
 from os import makedirs
 import subprocess
 from pickle import Pickler, Unpickler, dump, load
+from typing import List
 
 class DocumentClass(Command):
 
@@ -22,7 +23,7 @@ class DocumentClass(Command):
         super().__init__('documentclass',args=[document_type],options=opts)
         
 
-def article_class(font_pts=11,other_options=None):
+def article_class(font_pts=11,other_options=None) -> DocumentClass:
     return DocumentClass(font_pts,'article',other_options)
 
 
@@ -54,14 +55,14 @@ class Preamble(TextLines):
         super().__init__(lines,"Preamble for pytex-generated document")
         self._make_title(title,author,use_date)
 
-    def title_data(self):
+    def title_data(self) -> List[Command]:
         return self.title_data_commands
 
-    def make_title(self):
+    def make_title(self) -> Command:
         return self.make_title_command
 
 
-    def set_title(self, title, author=None, use_date=False):
+    def set_title(self, title, author=None, use_date=False) -> None:
         self._make_title(title,author,use_date)
 
     def _make_title(self, title, author, use_date):
@@ -100,7 +101,7 @@ class Document(Environment):
         self._get_doc_class(**kwargs)
         self.pickler = None
         
-    def add_required_packages(self, pkgs):
+    def add_required_packages(self, pkgs) -> None:
         if isinstance(pkgs, Environment):
             reqs = pkgs.get_required_packages()
         else:
@@ -125,12 +126,12 @@ class Document(Environment):
                 self.required_packages.append(pkg)
 
 
-    def add(self, new_text: Iterable):
+    def add(self, new_text: Iterable) -> None:
         for item in new_text:
             self.append(item)
             
     # takes a TextLines, Environment or derived
-    def append(self, new_text):
+    def append(self, new_text) -> None:
         self.sections.append(new_text)
         if isinstance(new_text, Environment):
             self.environments.append(new_text)
@@ -138,7 +139,7 @@ class Document(Environment):
             self.environments.append(None)
         
 
-    def insert(self, pos: int, new_text):
+    def insert(self, pos: int, new_text) -> None:
         try:
             self.sections.insert(pos,new_lines)
             if isinstance(new_text, Environment):
@@ -149,16 +150,17 @@ class Document(Environment):
             raise
 
 
-    def serialize(self, filename: str=None):
+    def pickle(self, filename: str=None) -> None:
         if filename is None:
             filename = 'document.dat'
         dump(self,open(filename,'wb'))
 
     @staticmethod
-    def from_file(filename: str):
+    def from_pickle(filename: str):
         with open(filename,'rb') as fnm:
             return load(fnm)
 
+    
 
     def _get_doc_class(self, **kwargs):
         self.doc_class = kwargs.get('doc_class',None)

@@ -212,7 +212,7 @@ def remove_colors(string: str) -> str:
 version of the code at https://github.com/FEniCS/ufl/blob/master/ufl/formatting/printing.py, but this actually works
 '''
 
-def get_ufl_form_info(form):
+def get_ufl_form_info(form) -> str:
     from ufl.form import Form
     from ufl.integral import Integral
     from ufl.formatting.printing import integral_info

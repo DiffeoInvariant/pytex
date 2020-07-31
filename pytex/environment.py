@@ -81,12 +81,14 @@ class Environment(TextLines):
 
 
 
-def ufl_form_info(form, name=None):
+
+def ufl_form_info(form, name=None) -> Environment:
         from pytex.utils import get_ufl_form_info
         #print(f"coeff names : {[x._name for x in form.coefficients()]}")
         req_pkgs = [UsePackage('fancyvrb')]
         return Environment('Verbatim',get_ufl_form_info(form).split('\n'),name if name else 'UFL Form info',starred=False,required_packages=req_pkgs,post_options=['xleftmargin=-3cm','fontsize=\\tiny'])
 
+        
 class Equation(Environment):
 
     #__slots__ = ['ufl_handler']
@@ -145,25 +147,47 @@ class Equation(Environment):
         return Equation([code],starred,eq_name)
 
 
+def ufl2latex(expr, starred: bool=False, name: str=None) -> Equation:
+    try:
+        return Equation.from_ufl(expr,starred,name)
+    except ImportError:
+        print("You probably need to install either UFL (`pip install fenics-ufl`) or pylatexenc (`pip install pylatexenc`)")
+        raise
+        
 
 
+    
 class Section(TextLines):
 
     __slots__ = ['begin']
     
-    def __init__(self, name: str, text_lines: Iterable, starred: bool=False, issubsection: bool = False):
+    def __init__(self, name: str, text_lines: Iterable, starred: bool=False, issubsection: bool = False, **kwargs):
         env = 'section*' if starred else 'section'
         if issubsection:
             env = 'sub'+env
         self.begin = Command(env,name if name else ' ',None)
         text_lines = text_lines if text_lines else []
         text_lines.insert(0,self.begin.get_as_line())
-        super().__init__(text_lines,name if name else ' ')
+        super().__init__(text_lines,name if name else ' ',**kwargs)
+
+
+    @staticmethod
+    def from_file(filename: str, section_name: str=None, starred: bool=False, **kwargs):
+        name = section_name if section_name else filename
+        text = TextLines.from_file(filename)
+        return Section(name,text.lines,starred,False,**kwargs)
 
 
 class Subsection(Section):
 
-    def __init__(self,name: str, text_lines: Iterable, starred: bool=False):
-        super().__init__(name,text_lines,starred,issubsection=True)
+    def __init__(self,name: str, text_lines: Iterable, starred: bool=False, **kwargs):
+        super().__init__(name,text_lines,starred,issubsection=True,**kwargs)
+
+
+    @staticmethod
+    def from_file(filename: str, section_name: str=None, starred: bool=False, **kwargs):
+        name = section_name if section_name else filename
+        text = TextLines.from_file(filename)
+        return Subsection(name,text.lines,starred,**kwargs)
 
 
