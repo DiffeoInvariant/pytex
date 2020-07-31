@@ -1,14 +1,20 @@
 from pytex import Document, Environment, Command, TextModifier, Section, Subsection, CodeColor, CodeStyle, CodeSnippet, Image
+from pytex.utils import register_colors, view_registered_colors, remove_colors
 from collections.abc import Iterable
 from inspect import getsource, getsourcelines
 import subprocess
 
 def make_pytest_report(pytest_output_file, **kwargs):
-    print(f"lines in {pytest_output_file}")
-    for line in open(pytest_output_file,'r').readlines():
-        print(line)
-    
-
+    ofile = open(pytest_output_file,'r')
+    clean_lines = []
+    for line in ofile.readlines():
+        #print(line.encode('ascii'),'\n')
+        print("split line:",line.encode('ascii').split(b'\x1b['))
+        register_colors(line,['blue','green','red'])
+        print(f"line without color defs: {remove_colors(line)}")
+        line = remove_colors(line)
+        #print("colors:\n")
+    view_registered_colors()
 
 
 
@@ -20,7 +26,7 @@ class TestReport(Document):
 
     def __init__(self, filename: str, report_title: str=None, author: str=None, use_date: bool=False, **kwargs):
         report_title = report_title if report_title else 'PyTeX-Generated Test Report'
-        super().__init__(filename, title=report_title,author=author,use_date=use_date)
+        super().__init__(filename, title=report_title,author=author,use_date=use_date,**kwargs)
         # pass in code_colors as a dictionary mapping
         # any (or multiple) of the strings {background_color,comment_color,keyword_color,number_color,string_color} or the Iterable[str] basic_style_mods
         # to instances of pytex.CodeColor
@@ -49,7 +55,8 @@ class TestReport(Document):
             print(f"Error, could not find source code for object {obj}!")
             raise
         
-        
+
+    #def add_pytest_header(self, header_lines
 
 
     def add_section(self, section_name: str, text_lines: Iterable):
