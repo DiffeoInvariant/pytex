@@ -38,10 +38,10 @@ class Preamble(TextLines):
      use_packages: list/tuple of tuples of (package_name,package_options)
     (package_options can be either list/tuple or None)
     '''
-    def __init__(self, doc_class: DocumentClass, use_packages: Iterable, title: str=None, author: str=None, use_date:bool = False):
-        self.packages = list(use_packages)
+    def __init__(self, doc_class: DocumentClass, required_packages: Iterable, title: str=None, author: str=None, use_date:bool = False):
+        self.packages = list(required_packages)
         lines = [doc_class.get_as_line(),'\n']
-        for package in use_packages:
+        for package in required_packages:
             if isinstance(package,UsePackage):
                 lines.append(package.get_as_line())
             elif isinstance(package,CodeStyle):
@@ -100,6 +100,9 @@ class Document(Environment):
         self.iswritten = False
         self._get_doc_class(**kwargs)
         self.pickler = None
+        pkgs = kwargs.get('required_packages',None)
+        if pkgs:
+            self.add_required_packages(pkgs)
         
     def add_required_packages(self, pkgs) -> None:
         if isinstance(pkgs, Environment):
