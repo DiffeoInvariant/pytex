@@ -5,6 +5,8 @@ from typing import List
 _color_registry = {}
 _inverse_color_registry = {}
 
+newline = '////'
+
 
 unicode_supers = {'\u2070'           : '0',
                         #f'\N{DEGREE SIGN}' : '0',
