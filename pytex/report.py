@@ -1,4 +1,4 @@
-from pytex import Document, Environment, Command, TextModifier, Section, Subsection, CodeColor, CodeStyle, CodeSnippet, Image
+from pytex import Document, Environment, Command, TextModifier, Section, Subsection, CodeColor, CodeStyle, CodeSnippet, Image, Figure
 from pytex.utils import register_colors, view_registered_colors, remove_colors
 from collections.abc import Iterable
 from inspect import getsource, getsourcelines
@@ -66,7 +66,10 @@ class TestReport(Document):
         self.append(Subsection(section_name, text_lines))
 
     def add_image(self, path: str, scale: float=1.0, other_options=None):
-        self.append(Image(path,scale,other_options))
+        if ('h' in other_options or 'H' in other_options or 'H!' in other_options):
+            self.append(Figure(Image(path,scale),other_options))
+        else:
+            self.append(Image(path,scale,other_options))
         
     def _get_code_style(self):
         styles = {'background_color' : CodeColor.DefaultBackground(),

@@ -1,7 +1,8 @@
 from .command import Command, UsePackage, TextModifier
 from .text import TextLines
 from .code import CodeStyle
-from .environment import Environment
+from .environment import Environment,Section
+from .image import Image
 from collections.abc import Iterable
 from os.path import abspath, exists, dirname
 from os import makedirs
@@ -107,6 +108,10 @@ class Document(Environment):
     def add_required_packages(self, pkgs) -> None:
         if isinstance(pkgs, Environment):
             reqs = pkgs.get_required_packages()
+        elif isinstance(pkgs,Image):
+            reqs = pkgs.required_packages
+        elif isinstance(pkgs,Section) or isinstance(pkgs,TextLines):
+            return
         else:
             reqs = []
             for pkg in pkgs:
@@ -119,6 +124,7 @@ class Document(Environment):
                             reqs.append(coldef)
                     if pkg not in reqs:
                         reqs.append(pkg)
+                        
                 elif isinstance(pkg,Iterable):
                     reqs.append(UsePackage(*pkg))
                 else:
@@ -175,6 +181,10 @@ class Document(Environment):
     def _set_required_packages(self):
         #NOTE: call right before writing
         for env in self.environments:
+            if env:
+                self.add_required_packages(env)
+
+        for env in self.sections:
             if env:
                 self.add_required_packages(env)
 
