@@ -110,11 +110,12 @@ class Document(Environment):
             reqs = pkgs.get_required_packages()
         elif isinstance(pkgs,Image):
             reqs = pkgs.required_packages
-        elif isinstance(pkgs,Section) or isinstance(pkgs,TextLines):
+        elif isinstance(pkgs,Section) or isinstance(pkgs,TextLines) or isinstance(pkgs,Command):
             return
         else:
             reqs = []
             for pkg in pkgs:
+                
                 if isinstance(pkg,UsePackage):
                     if pkg not in reqs:
                         reqs.append(pkg)
