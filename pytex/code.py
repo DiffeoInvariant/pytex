@@ -167,7 +167,7 @@ class CodeStyle:
                         'keywordstyle' : '\\color{' + kw.name() + '}',
                         'numberstyle' : '\\color{' + num.name() + '}',
                         'stringstyle' : '\\color{' + string.name() + '}',
-                        'basicstyle' : (basic_style.get() if isinstance(basic_style,str) else ''.join([x.get() for x in basic_style])),
+                        'basicstyle' : (basic_style if not isinstance(basic_style,Iterable) else ''.join([x.get() for x in basic_style])),
                         'breaklines' : 'true' if breaklines else 'false',
                         'captionpos' : captionpos,
                         'keepspaces' : 'true' if keepspaces else 'false',
@@ -189,7 +189,7 @@ _PYTEX_REQUIRED_CODE_PKGS = {
 
 class CodeSnippet(Environment):
 
-    def __init__(self, code_lines, language='C++', code_style=None, caption=None, name=None):
+    def __init__(self, code_lines, language='C++', code_style=None, caption=None, name=None, xleftmargin=None, xrightmargin=None):
         self.style = code_style if code_style else CodeStyle('default_pytex_code_style')
         self.lang = language
         super().__init__('lstlisting',code_lines,
@@ -204,6 +204,11 @@ class CodeSnippet(Environment):
         self.required_packages.append(self.style.get_as_line())
         lo = self._listing_options(language,caption)    
         if lo:
+            if xleftmargin:
+                lo.append(f'xleftmargin={xleftmargin}')
+            if xrightmargin:
+                lo.append(f'xrightmargin={xrightmargin}')
+                
             self.add_end_options_to_begin(lo)
         self._set_begin(self.begin.get())
         

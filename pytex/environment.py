@@ -13,7 +13,7 @@ class Environment(TextLines):
         nm = name if name else "Environment"
         self._get_begin(envtype,nm,starred,env_options,post_options)
         self._get_end(envtype,starred,env_options)
-        text_lines = text_lines if text_lines else []
+        text_lines = text_lines or []
         text_lines.insert(0,self.begin.get_as_line())
         text_lines.append(self.end.get_as_line())
         super().__init__(text_lines,nm)

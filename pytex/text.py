@@ -21,6 +21,8 @@ class TextLines:
     def __repr__(self):
         return self.__str__()
 
+    def insert(self, idx, new_line):
+        self.lines.insert(idx,_format_line(new_line))
     @staticmethod
     def from_file(filename: str):
         lines = [line for line in open(filename,'r')]
@@ -53,6 +55,10 @@ class TextLines:
 
     def prepend_line(self,new_line: str) -> None:
         self.lines.insert(0,new_line)
+
+
+    def append(self, new_line):
+        self.append_line(new_line)
 
     def append_line(self,newline: str) -> None:
         self.lines.append(_format_line(newline))

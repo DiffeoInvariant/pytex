@@ -34,8 +34,8 @@ class TestReport(Document):
         self._get_code_style()
 
 
-    def add_code_snippet(self, code_lines: Iterable, language='C++', caption=None):
-        self.append(CodeSnippet(code_lines,language=language,code_style=self.code_style,caption=caption))
+    def add_code_snippet(self, code_lines: Iterable, language='C++', caption=None, xleftmargin=None, xrightmargin=None):
+        self.append(CodeSnippet(code_lines,language=language,code_style=self.code_style,caption=caption,xleftmargin=xleftmargin,xrightmargin=xrightmargin))
 
     def add_python_function(self, func, caption=None):
         try:

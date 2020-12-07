@@ -248,7 +248,7 @@ class Document(Environment):
         if not self.iswritten:
             self.write()
 
-        compile_cmds = ['pdflatex', self.name()]
+        compile_cmds = ['pdflatex', '-halt-on-error', self.name(), '-o', (self.name().rstrip('.tex')) + '.pdf']
         
         outputs = subprocess.run(compile_cmds, capture_output=True)
         return outputs
